@@ -8,7 +8,7 @@ from sensor_msgs.msg import Joy
 from geometry_msgs.msg import Twist, PoseStamped
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 
-class TurtlebotController():
+class Controller():
     def __init__(self, initial_position, initial_orientation, odometry_topic, velocity_topic, k):
         self.x = initial_position[0]
         self.y = initial_position[1]
@@ -95,5 +95,5 @@ if __name__ == '__main__':
     # PID Gain Parameters: index 0-2 = velocity, index 3-5 = steering
     k = [0.0, 0.0, 0.0, 50.0, 0.0, 0.0]
 
-    turtlebot = TurtlebotController(init_position, init_orientation, odomTopic, velTopic, k)
+    turtlebot = Controller(init_position, init_orientation, odomTopic, velTopic, k)
     turtlebot.moveToTarget()
