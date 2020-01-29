@@ -16,6 +16,9 @@
 7. `chmod +x ~/catkin_ws/src/unity_simulation_scene/scripts/mouse_to_joy.py`
 8. cd ~/catkin_ws
 9. catkin_make
+10. Add the IP address of the host running Unity to your hosts file as well as a generic name for it.
+  - `sudo nano /etc/hosts`
+  - `192.168.1.XXX NewPC`
 
 ## Unity Side
 
