@@ -44,4 +44,6 @@
 # Launch Controller
 
 1. Setup the unity scene according to [this video.](https://www.youtube.com/watch?v=sup2Tdxt1ko&feature=youtu.be)
-2. 
+2. In "RosConnector" game object, add a Twist Subscriber component. Set topic as "/cmd_vel". Drag and add your "base_link" to Subscribed Transform.
+3. Open terminal and launch the following:
+   roslaunch unity_controller unity_controller.launch
