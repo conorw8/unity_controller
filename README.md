@@ -40,3 +40,8 @@
 3. Under Settings > Timeout, increase the value to 100
 4. Press Read Robot Description
 5. Do you want to generate a Turtlebot2 GameObject now?: Press Yes
+
+# Launch Controller
+
+1. Setup the unity scene according to [this video.](https://www.youtube.com/watch?v=sup2Tdxt1ko&feature=youtu.be)
+2. 
