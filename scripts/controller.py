@@ -6,6 +6,7 @@ import numpy as np
 from pid import PID
 from sensor_msgs.msg import Joy
 from geometry_msgs.msg import Twist, PoseStamped
+import matplotlib.pyplot as plt
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 
 class Controller():
@@ -16,13 +17,17 @@ class Controller():
         self.roll = initial_orientation[0]
         self.pitch = initial_orientation[1]
         self.yaw = initial_orientation[2]
+        self.velocity = 0.0
+        self.steering = 0.0
         self.odom = odometry_topic
         self.cmd_vel = velocity_topic
-        self.distance = 0.0
+        self.distance = 1000000.0
         self.heading = 0.0
         self.pid = PID(k)
-        self.last_time = 0.0
-        self.threshold = 0.5
+        self.time = 0.0
+        self.iteration = 0
+        self.eta = 0.01
+        self.path_data = []
 
     def odomCallback(self, msg):
         self.x = float(msg.pose.position.x)
@@ -53,7 +58,7 @@ class Controller():
             delta_y2 = 1e25
         self.distance = math.sqrt(delta_x2 + delta_y2)
 
-    def moveToTarget(self):
+    def moveToTarget(self, target, usePID=True, verbose=True):
         # initialize node
         rospy.init_node('mouseToJoy', anonymous = True)
 
@@ -64,36 +69,36 @@ class Controller():
         velocityPublisher = rospy.Publisher(self.cmd_vel, Twist, queue_size=5, tcp_nodelay=True)
         rate = rospy.Rate(20) # 20hz
         msg = Twist()
-        target = np.array([10.0, 10.0])
+        self.time = rospy.Time.now().to_sec()
+        self.iteration = 0
 
         while not rospy.is_shutdown():
             self.calculateError(target)
-            dt = rospy.Time.now().to_sec() - self.last_time
+            current_time = rospy.Time.now().to_sec()
+            dt = current_time - self.time
             self.pid.calculatePID(self.distance, self.heading, dt)
-            self.last_time = rospy.Time.now().to_sec()
+            self.time = current_time
 
-            print(self.x, self.y)
+            if usePID:
+                self.velocity = self.pid.velocity
+                self.steering = self.pid.steering
 
-            if math.fabs(self.distance) > self.threshold:
-                msg.linear.x = 1
-                # msg.linear.x = self.pid.velociy
-                # msg.angular.z = 100
-                msg.angular.z = self.pid.steering
-            else:
+            self.path_data.append([self.x, self.y, self.z, self.roll, self.pitch, self.yaw, self.time, self.iteration])
+
+            msg.linear.x = self.velocity
+            msg.angular.z = self.steering
+
+            if verbose:
+                print("Current state: [%s, %s, %s]" % (self.x, self.y, self.yaw))
+
+            if (self.distance <= self.eta):
                 msg.linear.x = 0.0
                 msg.angular.z = 0.0
                 print("Target Reached")
+                velocityPublisher.publish(msg)
+                rate.sleep()
+                return
 
+            self.iteration += 1
             velocityPublisher.publish(msg)
             rate.sleep()
-
-if __name__ == '__main__':
-    init_position = np.array([0.0, 0.0, 0.0])
-    init_orientation = np.array([0.0, 0.0, 0.0])
-    odomTopic = "/odom"
-    velTopic = "/cmd_vel"
-    # PID Gain Parameters: index 0-2 = velocity, index 3-5 = steering
-    k = [0.0, 0.0, 0.0, 50.0, 0.0, 0.0]
-
-    turtlebot = Controller(init_position, init_orientation, odomTopic, velTopic, k)
-    turtlebot.moveToTarget()
