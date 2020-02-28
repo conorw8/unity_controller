@@ -1,0 +1,13 @@
+Header header
+float64 lin_vel
+float64 ang_vel
+float64 x
+float64 y
+float64 theta
+float64 delta_x
+float64 delta_y
+float64 delta_theta
+int32 index
+float64 time
+float64 rx
+float64 tx
