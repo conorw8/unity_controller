@@ -3,6 +3,7 @@
 import rospy
 import math
 import numpy as np
+import pandas as pd
 from pid import PID
 from sensor_msgs.msg import Joy
 from geometry_msgs.msg import Twist, PoseStamped
@@ -28,10 +29,20 @@ class Controller():
         self.iteration = 0
         self.eta = 0.01
         self.path_data = []
+        self.noise_distribution = [[ 2.00000000e+01, 6.62201978e-03, -1.99941291e+01],
+                                   [-5.10091508, -0.06503655, 5.08946158],
+                                   [-0.01754703, 1.0, 0.06324038]]
+        self.noise_a = 0.0
+        self.noise_b = 0.0
+        self.noise_c = 0.0
+        self.white_noise = 0.0
+        self.normalDistance = 0.0
 
     def odomCallback(self, msg):
+        noise = self.computeNoiseFunction()
+        # print("noise function: %s" % noise)
         self.x = float(msg.pose.position.x)
-        self.y = float(msg.pose.position.y)
+        self.y = float(msg.pose.position.y) + noise
         self.z = float(msg.pose.position.z)
         orientation_quaternion = msg.pose.orientation
         orientation_list = [orientation_quaternion.x, orientation_quaternion.y, orientation_quaternion.z, orientation_quaternion.w]
@@ -40,65 +51,70 @@ class Controller():
         self.pitch = float(pitch)
         self.yaw = float(yaw)
 
+    def readNoiseFunction(self, path):
+        df = pd.read_csv(path)
+        dataset = df[['mean1','mean2','mean3','std1','std2','std3']]
+        dataset = dataset.to_numpy()
+
+        dataset = np.concatenate([np.reshape(np.zeros(dataset.shape[1]), (1, -1)), dataset])
+        print(dataset.shape)
+
+        self.noise_distribution = dataset
+
+    def setNoiseFunction(self, fault):
+        a_mu = self.noise_distribution[fault, 0]
+        b_mu = self.noise_distribution[fault, 1]
+        c_mu = self.noise_distribution[fault, 2]
+        a_sigma = 0.01
+        b_sigma = 0.02
+        c_sigma = 0.04
+
+        self.noise_a = np.random.normal(a_mu, a_sigma, 1)
+        self.noise_b = np.random.normal(b_mu, b_sigma, 1)
+        self.noise_c = np.random.normal(c_mu, c_sigma, 1)
+
+        print(self.noise_a, self.noise_b, self.noise_c)
+
+        if fault != 0:
+            self.white_noise = 0.1
+
+    def computeNoiseFunction(self):
+        fault_noise = self.noise_a * np.exp(self.noise_b * self.x) + self.noise_c
+        white_noise = np.random.normal(0, self.white_noise)
+
+        return fault_noise + white_noise
+
+    def angdiff(self, a, b):
+        diff = a - b
+        print("diff: %s" % diff)
+        if diff < 0.0:
+            diff = (diff % (-2*math.pi))
+            print(diff)
+            if diff < (-math.pi):
+                diff = diff + 2*math.pi
+        else:
+            diff = (diff % 2*math.pi)
+            if diff > math.pi:
+                diff = diff - 2*math.pi
+
+        return diff
+
     ####
     #    Parameters: target = [x*, y*]
     #    Returns: Euclidean Distance Error, Heading Error
     ####
-    def calculateError(self, target):
-        delta_x = np.clip(target[0] - self.x, -1e50, 1e50)
-        delta_y = np.clip(target[1] - self.y, -1e50, 1e50)
+    def calculateError(self, target, fault):
+        delta_x = target[0] - self.x
+        delta_y = target[1] - self.y
         desired_heading = math.atan2(delta_y, delta_x)
+        self.heading = self.angdiff(desired_heading, self.yaw)
 
-        self.heading = desired_heading - self.yaw
         delta_x2 = delta_x**2
         delta_y2 = delta_y**2
-        if math.isinf(delta_x2):
-            delta_x2 = 1e25
-        if math.isinf(delta_y2):
-            delta_y2 = 1e25
+
         self.distance = math.sqrt(delta_x2 + delta_y2)
 
-    def moveToTarget(self, target, usePID=True, verbose=True):
-        # initialize node
-        rospy.init_node('mouseToJoy', anonymous = True)
-
-        #### Setup Odometry Subscriber
-        rospy.Subscriber(self.odom, PoseStamped, self.odomCallback, queue_size=5, tcp_nodelay=True)
-
-    	#### Setup Velocity Publisher
-        velocityPublisher = rospy.Publisher(self.cmd_vel, Twist, queue_size=5, tcp_nodelay=True)
-        rate = rospy.Rate(20) # 20hz
-        msg = Twist()
-        self.time = rospy.Time.now().to_sec()
-        self.iteration = 0
-
-        while not rospy.is_shutdown():
-            self.calculateError(target)
-            current_time = rospy.Time.now().to_sec()
-            dt = current_time - self.time
-            self.pid.calculatePID(self.distance, self.heading, dt)
-            self.time = current_time
-
-            if usePID:
-                self.velocity = self.pid.velocity
-                self.steering = self.pid.steering
-
-            self.path_data.append([self.x, self.y, self.z, self.roll, self.pitch, self.yaw, self.time, self.iteration])
-
-            msg.linear.x = self.velocity
-            msg.angular.z = self.steering
-
-            if verbose:
-                print("Current state: [%s, %s, %s]" % (self.x, self.y, self.yaw))
-
-            if (self.distance <= self.eta):
-                msg.linear.x = 0.0
-                msg.angular.z = 0.0
-                print("Target Reached")
-                velocityPublisher.publish(msg)
-                rate.sleep()
-                return
-
-            self.iteration += 1
-            velocityPublisher.publish(msg)
-            rate.sleep()
+    def computeNormalDistance(self, line, fault):
+        slope_of_line = math.atan2(line[0], -line[1])
+        self.heading = self.angdiff(slope_of_line, self.yaw)
+        self.distance = ((self.x*line[0])+(self.y*line[1])+(line[2]))/math.sqrt((line[0]**2)+(line[1]**2))

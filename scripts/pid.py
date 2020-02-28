@@ -12,7 +12,8 @@ class PID():
         self.Integral_theta = 0
         self.d_max = 1
         self.theta_max = math.pi
-        self.fitness = 0
+        self.max_vel = 10.0
+        self.max_rad = 45.0
 
     def calculatePID(self, distance, heading, dt):
         self.Integral_d = self.Integral_d + distance

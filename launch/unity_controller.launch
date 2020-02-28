@@ -6,6 +6,6 @@
 
 	<node name="file_server" pkg="file_server" type="file_server" output="screen"/>
 
-	<node name="controller" pkg="unity_controller" type="controller.py" output="screen"/>
+	<node name="controller" pkg="unity_controller" type="drive_ugv.py" output="screen"/>
 
 </launch>
