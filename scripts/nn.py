@@ -39,7 +39,9 @@ class NN():
         # # Multichannel CNN Model
         self.model = Sequential()
         self.model.add(CuDNNLSTM(128, input_shape=(self.lookback,self.num_features), return_sequences=True))
+        self.model.add(Dropout(0.2))
         self.model.add(CuDNNLSTM(128))
+        self.model.add(Dropout(0.2))
         self.model.add(Dense(self.num_labels, activation='softmax'))
 
         # self.model.add(Conv1D(filters=64, kernel_size=2, activation='relu', input_shape=(self.lookback,self.num_features)))

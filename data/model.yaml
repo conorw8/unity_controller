@@ -8,7 +8,7 @@ config:
       batch_input_shape: !!python/tuple
       - null
       - 10
-      - 4
+      - 8
       bias_constraint: null
       bias_initializer:
         class_name: Zeros
@@ -39,6 +39,13 @@ config:
       trainable: true
       unit_forget_bias: true
       units: 128
+  - class_name: Dropout
+    config:
+      name: dropout_1
+      noise_shape: null
+      rate: 0.2
+      seed: null
+      trainable: true
   - class_name: CuDNNLSTM
     config:
       activity_regularizer: null
@@ -71,6 +78,13 @@ config:
       trainable: true
       unit_forget_bias: true
       units: 128
+  - class_name: Dropout
+    config:
+      name: dropout_2
+      noise_shape: null
+      rate: 0.2
+      seed: null
+      trainable: true
   - class_name: Dense
     config:
       activation: softmax

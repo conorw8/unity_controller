@@ -58,11 +58,19 @@ class FaultClassifier():
 
     def loadData(self, path):
         df = pd.read_csv(path)
-        dataset = df[['%x', '%y', '%theta', '%iter', '%label']]
+        dataset = df[['%velocity','%steering','%x','%y','%theta','%iteration','%time','%delay','%label']]
         dataset = dataset.to_numpy()
         data = dataset[:, :-1]
         print(data.shape)
         labels = np.reshape(dataset[:, -1], (-1, 1))
+
+        for i in range(data.shape[0]):
+            x_noise = np.random.normal(0.0, 0.004, 1)
+            y_noise = np.random.normal(0.0, 0.004, 1)
+            theta_noise = np.random.normal(0.0, 0.004, 1)
+            data[i, 2] += x_noise
+            data[i, 3] += y_noise
+            data[i, 4] += theta_noise
 
         self.scaler = MinMaxScaler(feature_range=(-1, 1))
         self.encoder = OneHotEncoder(sparse=False)
@@ -87,11 +95,12 @@ class FaultClassifier():
 
         print('Finished in %s second(s)' % round((elapsed1), 3))
 
-        lstm_y_hat = self.lstm_model.model.predict(x=self.test_x, batch_size=self.batch_size, verbose=1)
+        lstm_y_hat = self.lstm_model.model.evaluate(x=self.test_x, y=self.test_y, batch_size=self.batch_size, verbose=1)
+        print(lstm_y_hat)
 
-        lstm_y_pred = np.zeros((lstm_y_hat.shape[0], self.num_labels))
-        for i in range(lstm_y_hat.shape[0]):
-            if np.argmax(lstm_y_hat[i, :]) == 0:
+        lstm_y_pred = np.zeros((lstm_y_hat_test.shape[0], self.num_labels))
+        for i in range(lstm_y_hat_test.shape[0]):
+            if np.argmax(lstm_y_hat_test[i, :]) == 0:
                 lstm_y_pred[i, :] = [1, 0, 0]
             elif np.argmax(lstm_y_hat[i, :]) == 1:
                 lstm_y_pred[i, :] = [0, 1, 0]
@@ -106,12 +115,7 @@ class FaultClassifier():
 
 if __name__ == '__main__':
     path = '/home/conor/catkin_ws/src/unity_controller/data/sim_data.csv'
-    classifier1 = FaultClassifier(num_features=4, num_labels=3, lookback=10, num_epochs=500, batch_size=128)
+    classifier1 = FaultClassifier(num_features=8, num_labels=3, lookback=10, num_epochs=500, batch_size=128)
     classifier1.loadData(path)
     classifier1.trainModel()
     classifier1.predict()
-    # pool = multiprocessing.Pool(4)
-    # models = [classifier1.lstm_model1, classifier1.lstm_model2, classifier1.cnn_model1, classifier1.cnn_model2]
-    # pool.apply_async(predict, models)
-    # pool.close()
-    # pool.join()

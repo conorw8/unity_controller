@@ -11,6 +11,8 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
+  geometry_msgs
+  message_generation
 )
 
 ## System dependencies are found with CMake's conventions
@@ -50,6 +52,9 @@ find_package(catkin REQUIRED COMPONENTS
 add_message_files(
   FILES
   Feature.msg
+  AgentPose.msg
+  AgentVelocity.msg
+  Velocity.msg
 )
 
 ## Generate services in the 'srv' folder
@@ -70,6 +75,7 @@ add_message_files(
 generate_messages(
   DEPENDENCIES
   std_msgs
+  geometry_msgs
 )
 
 ################################################
@@ -103,9 +109,9 @@ generate_messages(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES unity_simulation_scene
-#  CATKIN_DEPENDS roscpp rospy std_msgs
-#  DEPENDS system_lib
+   LIBRARIES unity_controller
+   CATKIN_DEPENDS roscpp rospy std_msgs geometry_msgs
+   DEPENDS system_lib
 )
 
 ###########
