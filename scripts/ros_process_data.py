@@ -55,7 +55,7 @@ def processData(pid, line, scaler, acquire_data):
 
     labels = ["ideal", "no fault", "left fault", "right fault"]
     rospy.Subscriber('/lilbot_EFD047/agent_poses', AgentPose, poseCallback, queue_size=1, tcp_nodelay=True)
-    velocity_publisher = rospy.Publisher('/ace_Z170X_UD3/agent_velocities', AgentVelocity, queue_size=1, tcp_nodelay=True)
+    velocity_publisher = rospy.Publisher('agent_velocities', AgentVelocity, queue_size=1, tcp_nodelay=True)
     rate = rospy.Rate(10) # 10hz
     msg = AgentVelocity()
     ideal_velocity = Velocity()

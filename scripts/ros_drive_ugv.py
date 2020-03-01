@@ -31,7 +31,7 @@ def driveClosedLoop(ideal_ugv, faulty_ugv):
     start_point = ideal_ugv.x.copy()
     labels = ["ideal", "no fault", "left fault", "right fault"]
     rospy.Subscriber('/ace_Z170X_UD3/agent_velocities', AgentVelocity, inputsCallback, queue_size=1, tcp_nodelay=True)
-    agents_publisher = rospy.Publisher('/lilbot_EFD047/agent_poses', AgentPose, queue_size=1, tcp_nodelay=True)
+    agents_publisher = rospy.Publisher('agent_poses', AgentPose, queue_size=1, tcp_nodelay=True)
     rate = rospy.Rate(10) # 10hz
     msg = AgentPose()
     ideal_pose = Pose()
