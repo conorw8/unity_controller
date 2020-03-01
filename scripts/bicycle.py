@@ -51,7 +51,7 @@ class Bicycle():
             self.noise_a = np.random.normal(a_mu, a_sigma, 1)
             self.noise_b = np.random.normal(b_mu, b_sigma, 1)
             self.noise_c = np.random.normal(c_mu, c_sigma, 1)
-            self.white_noise = 0.75
+            self.white_noise = 0.4
 
         self.noise_b = np.clip(self.noise_b, -0.75, 0.75)
         print("[%s, %s, %s]" % (self.noise_a, self.noise_b, self.noise_c))
