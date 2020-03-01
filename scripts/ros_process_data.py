@@ -26,7 +26,7 @@ faulty_pose = None
 residual = np.empty(3)
 
 def loadScaler():
-    path = '/home/conor/catkin_ws/src/unity_controller/data/sim_data.csv'
+    path = '/home/ace/catkin_ws/src/unity_controller/data/sim_data.csv'
     df = pd.read_csv(path)
     df = df[['%velocity','%steering','%x','%y','%theta','%iteration','%time','%delay','%label']]
     df_array = df.to_numpy()
@@ -69,9 +69,9 @@ def processData(pid, line, scaler, acquire_data):
     num_features = 8
     feature_vector = np.empty(num_features)
     training_data = []
-    hostname = "192.168.1.180"
+    hostname = "192.168.1.151"
 
-    producer = KafkaProducer(bootstrap_servers=['192.168.1.180:9092'],
+    producer = KafkaProducer(bootstrap_servers=['192.168.1.108:9092'],
                              value_serializer=lambda x:
                              dumps(x).encode('utf-8'))
 
@@ -90,18 +90,18 @@ def processData(pid, line, scaler, acquire_data):
             output = subprocess.Popen(["sudo", "ping",hostname, "-c", "1", "-i", "0.1"],stdout = subprocess.PIPE).communicate()[0]
             delay = re.findall(r"[0-9]+\.[0-9]+/([0-9]+\.[0-9]+)/[0-9]+\.[0-9]+/[0-9]+\.[0-9]+", output.decode('utf-8'))
 
-            feature_vector = np.array([float(0.5), float(faulty_velocity.velocity + faulty_velocity.steering), float(residual[0]), float(residual[1]), float(residual[2]), float(iteration), float(time), float(delay[0])])
+            feature_vector = np.array([float(faulty_pose.position.z), float(faulty_velocity.velocity + faulty_velocity.steering), float(residual[0]), float(residual[1]), float(residual[2]), float(iteration), float(time), float(delay[0])])
             feature_vector = np.reshape(feature_vector, (1, num_features))
 
             if acquire_data:
-                sample = np.concatenate((feature_vector, np.reshape([2.0], (1, 1))), axis=1)
+                sample = np.concatenate((feature_vector, np.reshape([1.0], (1, 1))), axis=1)
                 training_data.append(sample)
                 print(feature_vector)
             else:
                 data = np.reshape(feature_vector, (1, num_features))
                 normalized_data = scaler.transform(data)
 
-                normalized_data = np.concatenate((normalized_data, np.reshape([2.0], (1, 1))), axis=1)
+                normalized_data = np.concatenate((normalized_data, np.reshape([1.0], (1, 1))), axis=1)
                 print(normalized_data.tolist)
 
                 value = {'signal' : normalized_data.tolist()}
@@ -121,7 +121,7 @@ def processData(pid, line, scaler, acquire_data):
                 if np.isnan(np.sum(training_data)):
                     return
                 else:
-                    f = open('/home/conor/catkin_ws/src/unity_controller/data/sim_data.csv', 'a')
+                    f = open('/home/ace/catkin_ws/src/unity_controller/data/sim_data.csv', 'a')
                     np.savetxt(f, training_data, delimiter=",")
                     return
             else:
@@ -132,7 +132,8 @@ def processData(pid, line, scaler, acquire_data):
 
 if __name__ == '__main__':
     # Create a MinMaxScaler
-    scaler = loadScaler()
+    # scaler = loadScaler()
+    scaler = None
 
     # Process Data
     init_pose = np.array([0.0, 0.0, math.radians(0)])
@@ -140,7 +141,7 @@ if __name__ == '__main__':
     k = [0.5, 0.0, 0.0, 1, 0.0, 0.0]
     pid = PID(k)
     line = np.array([1.0, -2.0, 4.0])
-    processData(pid, line, scaler, 0)
+    processData(pid, line, scaler, 1)
 
     # data = np.concatenate((path1_error, path2_error, path3_error), axis=0)
     # # print(data)

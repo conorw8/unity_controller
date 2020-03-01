@@ -5,6 +5,7 @@ import csv
 import random
 import pandas as pd
 import tensorflow as tf
+from tensorflow.keras import backend
 from keras import optimizers, Sequential
 from keras.models import Model
 from keras.utils import plot_model
@@ -54,8 +55,8 @@ class NN():
         self.model.fit(x=self.train_x, y=self.train_y, epochs=self.num_epochs, batch_size=self.batch_size, verbose=1)
 
         # serialize model to YAML
-        model_path = '/home/conor/catkin_ws/src/unity_controller/data/model.yaml'
-        weights_path = '/home/conor/catkin_ws/src/unity_controller/data/model.h5'
+        model_path = '/home/ace/catkin_ws/src/unity_controller/data/model.yaml'
+        weights_path = '/home/ace/catkin_ws/src/unity_controller/data/model.h5'
         model_yaml = self.model.to_yaml()
         with open(model_path, "w") as yaml_file:
             yaml_file.write(model_yaml)

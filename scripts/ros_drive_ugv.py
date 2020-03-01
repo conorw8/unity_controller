@@ -45,6 +45,7 @@ def driveClosedLoop(ideal_ugv, faulty_ugv):
     first_move = True
     current_index = 0
     previous_time = 0.0
+    velocity = np.random.uniform(0.2, 0.7, 1)
 
     while not rospy.is_shutdown():
         # print(ideal_ugv.x[0, 0], ideal_ugv.x[1, 0], ideal_ugv.x[2, 0])
@@ -59,7 +60,7 @@ def driveClosedLoop(ideal_ugv, faulty_ugv):
             ideal_steering = ideal_velocity.velocity + ideal_velocity.steering
             ideal_steering = np.clip(ideal_steering, (-1*math.radians(ideal_ugv.max_rad)), math.radians(ideal_ugv.max_rad))
             # print(dt)
-            ideal_ugv.dynamics(0.5, ideal_steering, dt)
+            ideal_ugv.dynamics(velocity, ideal_steering, dt)
             ideal_pose.position.x = ideal_ugv.x[0, 0]
             ideal_pose.position.y = ideal_ugv.x[1, 0]
             ideal_pose.orientation.z = ideal_ugv.x[2, 0]
@@ -67,9 +68,10 @@ def driveClosedLoop(ideal_ugv, faulty_ugv):
             faulty_steering = faulty_velocity.velocity + faulty_velocity.steering
             faulty_steering = np.clip(faulty_steering, (-1*math.radians(faulty_ugv.max_rad)), math.radians(faulty_ugv.max_rad))
             # print(faulty_steering)
-            faulty_ugv.dynamics(0.5, faulty_steering, dt)
+            faulty_ugv.dynamics(velocity, faulty_steering, dt)
             faulty_pose.position.x = faulty_ugv.x[0, 0]
             faulty_pose.position.y = faulty_ugv.x[1, 0]
+            faulty_pose.position.z = velocity
             faulty_pose.orientation.z = faulty_ugv.x[2, 0]
             iteration += 1
             i += 1
@@ -107,7 +109,7 @@ if __name__ == '__main__':
     healthy_ugv.setNoiseFunction()
     init_pose = np.array([0.0, 0.0, math.radians(0)])
     init_pose = np.reshape(init_pose, (3,1))
-    fault1_ugv = Bicycle(init_pose, 22.5, 10, faulty_k, fault=2)
+    fault1_ugv = Bicycle(init_pose, 22.5, 10, faulty_k, fault=1)
     fault1_ugv.setNoiseFunction()
 
     line = np.array([1.0, -2.0, 4.0])
