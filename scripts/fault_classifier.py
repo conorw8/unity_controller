@@ -115,7 +115,7 @@ class FaultClassifier():
 
 if __name__ == '__main__':
     path = '/home/ace/catkin_ws/src/unity_controller/data/sim_data.csv'
-    classifier1 = FaultClassifier(num_features=8, num_labels=3, lookback=10, num_epochs=25, batch_size=128)
+    classifier1 = FaultClassifier(num_features=8, num_labels=3, lookback=10, num_epochs=500, batch_size=128)
     classifier1.loadData(path)
     classifier1.trainModel()
     classifier1.predict()

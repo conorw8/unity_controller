@@ -90,18 +90,21 @@ def processData(pid, line, scaler, acquire_data):
             output = subprocess.Popen(["sudo", "ping",hostname, "-c", "1", "-i", "0.1"],stdout = subprocess.PIPE).communicate()[0]
             delay = re.findall(r"[0-9]+\.[0-9]+/([0-9]+\.[0-9]+)/[0-9]+\.[0-9]+/[0-9]+\.[0-9]+", output.decode('utf-8'))
 
+            if delay == None:
+                delay = np.array([0])
+
             feature_vector = np.array([float(faulty_pose.position.z), float(faulty_velocity.velocity + faulty_velocity.steering), float(residual[0]), float(residual[1]), float(residual[2]), float(iteration), float(time), float(delay[0])])
             feature_vector = np.reshape(feature_vector, (1, num_features))
 
             if acquire_data:
-                sample = np.concatenate((feature_vector, np.reshape([2.0], (1, 1))), axis=1)
+                sample = np.concatenate((feature_vector, np.reshape([3.0], (1, 1))), axis=1)
                 training_data.append(sample)
                 print(feature_vector)
             else:
                 data = np.reshape(feature_vector, (1, num_features))
                 normalized_data = scaler.transform(data)
 
-                normalized_data = np.concatenate((normalized_data, np.reshape([2.0], (1, 1))), axis=1)
+                normalized_data = np.concatenate((normalized_data, np.reshape([3.0], (1, 1))), axis=1)
                 print(normalized_data.tolist)
 
                 value = {'signal' : normalized_data.tolist()}
