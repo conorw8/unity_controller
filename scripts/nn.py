@@ -37,26 +37,30 @@ class NN():
         self.model = None
 
     def buildModel(self):
-        # # Multichannel CNN Model
+        # LSTM Model
         self.model = Sequential()
         self.model.add(CuDNNLSTM(128, input_shape=(self.lookback,self.num_features), return_sequences=True))
-        self.model.add(Dropout(0.2))
+        self.model.add(Dropout(0.3))
         self.model.add(CuDNNLSTM(128))
-        self.model.add(Dropout(0.2))
+        self.model.add(Dropout(0.3))
         self.model.add(Dense(self.num_labels, activation='softmax'))
 
-        # self.model.add(Conv1D(filters=64, kernel_size=2, activation='relu', input_shape=(self.lookback,self.num_features)))
+        # # CNN Model
+        # self.model = Sequential()
+        # self.model.add(Conv1D(filters=128, kernel_size=3, activation='tanh', input_shape=(self.lookback,self.num_features)))
+        # self.model.add(MaxPooling1D(pool_size=2))
+        # self.model.add(Conv1D(filters=128, kernel_size=3, activation='tanh', input_shape=(self.lookback,self.num_features)))
         # self.model.add(MaxPooling1D(pool_size=2))
         # self.model.add(Flatten())
         # self.model.add(Dense(self.num_labels, activation='softmax'))
 
         self.model.compile(optimizer='Adam', loss='categorical_crossentropy', metrics=['accuracy'])
 
-        self.model.fit(x=self.train_x, y=self.train_y, epochs=self.num_epochs, batch_size=self.batch_size, verbose=1)
+        self.model.fit(x=self.train_x, y=self.train_y, validation_data=(self.test_x, self.test_y), epochs=self.num_epochs, batch_size=self.batch_size, verbose=1)
 
         # serialize model to YAML
-        model_path = '/home/ace/catkin_ws/src/unity_controller/data/model.yaml'
-        weights_path = '/home/ace/catkin_ws/src/unity_controller/data/model.h5'
+        model_path = '/home/conor/catkin_ws/src/unity_controller/data/model.yaml'
+        weights_path = '/home/conor/catkin_ws/src/unity_controller/data/model.h5'
         model_yaml = self.model.to_yaml()
         with open(model_path, "w") as yaml_file:
             yaml_file.write(model_yaml)

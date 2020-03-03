@@ -5,7 +5,10 @@ config:
   - class_name: CuDNNLSTM
     config:
       activity_regularizer: null
-      batch_input_shape: !!python/tuple [null, 10, 8]
+      batch_input_shape: !!python/tuple
+      - null
+      - 10
+      - 8
       bias_constraint: null
       bias_initializer:
         class_name: Zeros
@@ -16,13 +19,19 @@ config:
       kernel_constraint: null
       kernel_initializer:
         class_name: VarianceScaling
-        config: {distribution: uniform, mode: fan_avg, scale: 1.0, seed: null}
+        config:
+          distribution: uniform
+          mode: fan_avg
+          scale: 1.0
+          seed: null
       kernel_regularizer: null
       name: cu_dnnlstm_1
       recurrent_constraint: null
       recurrent_initializer:
         class_name: Orthogonal
-        config: {gain: 1.0, seed: null}
+        config:
+          gain: 1.0
+          seed: null
       recurrent_regularizer: null
       return_sequences: true
       return_state: false
@@ -31,7 +40,12 @@ config:
       unit_forget_bias: true
       units: 128
   - class_name: Dropout
-    config: {name: dropout_1, noise_shape: null, rate: 0.2, seed: null, trainable: true}
+    config:
+      name: dropout_1
+      noise_shape: null
+      rate: 0.3
+      seed: null
+      trainable: true
   - class_name: CuDNNLSTM
     config:
       activity_regularizer: null
@@ -44,13 +58,19 @@ config:
       kernel_constraint: null
       kernel_initializer:
         class_name: VarianceScaling
-        config: {distribution: uniform, mode: fan_avg, scale: 1.0, seed: null}
+        config:
+          distribution: uniform
+          mode: fan_avg
+          scale: 1.0
+          seed: null
       kernel_regularizer: null
       name: cu_dnnlstm_2
       recurrent_constraint: null
       recurrent_initializer:
         class_name: Orthogonal
-        config: {gain: 1.0, seed: null}
+        config:
+          gain: 1.0
+          seed: null
       recurrent_regularizer: null
       return_sequences: false
       return_state: false
@@ -59,7 +79,12 @@ config:
       unit_forget_bias: true
       units: 128
   - class_name: Dropout
-    config: {name: dropout_2, noise_shape: null, rate: 0.2, seed: null, trainable: true}
+    config:
+      name: dropout_2
+      noise_shape: null
+      rate: 0.3
+      seed: null
+      trainable: true
   - class_name: Dense
     config:
       activation: softmax
@@ -72,7 +97,11 @@ config:
       kernel_constraint: null
       kernel_initializer:
         class_name: VarianceScaling
-        config: {distribution: uniform, mode: fan_avg, scale: 1.0, seed: null}
+        config:
+          distribution: uniform
+          mode: fan_avg
+          scale: 1.0
+          seed: null
       kernel_regularizer: null
       name: dense_1
       trainable: true
