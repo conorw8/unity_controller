@@ -36,13 +36,13 @@ class NN():
         self.encoder = None
         self.model = None
 
-    def buildModel(self):
+    def buildModel(self, model_path, weights_path, dropout):
         # LSTM Model
         self.model = Sequential()
         self.model.add(CuDNNLSTM(128, input_shape=(self.lookback,self.num_features), return_sequences=True))
-        self.model.add(Dropout(0.3))
+        self.model.add(Dropout(dropout))
         self.model.add(CuDNNLSTM(128))
-        self.model.add(Dropout(0.3))
+        self.model.add(Dropout(dropout))
         self.model.add(Dense(self.num_labels, activation='softmax'))
 
         # # CNN Model
@@ -59,8 +59,8 @@ class NN():
         self.model.fit(x=self.train_x, y=self.train_y, validation_data=(self.test_x, self.test_y), epochs=self.num_epochs, batch_size=self.batch_size, verbose=1)
 
         # serialize model to YAML
-        model_path = '/home/conor/catkin_ws/src/unity_controller/data/model.yaml'
-        weights_path = '/home/conor/catkin_ws/src/unity_controller/data/model.h5'
+        model_path = model_path #'/home/ace/catkin_ws/src/unity_controller/data/model.yaml'
+        weights_path = weights_path #'/home/ace/catkin_ws/src/unity_controller/data/model.h5'
         model_yaml = self.model.to_yaml()
         with open(model_path, "w") as yaml_file:
             yaml_file.write(model_yaml)

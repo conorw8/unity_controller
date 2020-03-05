@@ -18,7 +18,7 @@ config:
         class_name: VarianceScaling
         config: {distribution: uniform, mode: fan_avg, scale: 1.0, seed: null}
       kernel_regularizer: null
-      name: cu_dnnlstm_1
+      name: cu_dnnlstm_3
       recurrent_constraint: null
       recurrent_initializer:
         class_name: Orthogonal
@@ -31,7 +31,7 @@ config:
       unit_forget_bias: true
       units: 128
   - class_name: Dropout
-    config: {name: dropout_1, noise_shape: null, rate: 0.3, seed: null, trainable: true}
+    config: {name: dropout_3, noise_shape: null, rate: 0.2, seed: null, trainable: true}
   - class_name: CuDNNLSTM
     config:
       activity_regularizer: null
@@ -46,7 +46,7 @@ config:
         class_name: VarianceScaling
         config: {distribution: uniform, mode: fan_avg, scale: 1.0, seed: null}
       kernel_regularizer: null
-      name: cu_dnnlstm_2
+      name: cu_dnnlstm_4
       recurrent_constraint: null
       recurrent_initializer:
         class_name: Orthogonal
@@ -59,7 +59,7 @@ config:
       unit_forget_bias: true
       units: 128
   - class_name: Dropout
-    config: {name: dropout_2, noise_shape: null, rate: 0.3, seed: null, trainable: true}
+    config: {name: dropout_4, noise_shape: null, rate: 0.2, seed: null, trainable: true}
   - class_name: Dense
     config:
       activation: softmax
@@ -74,9 +74,9 @@ config:
         class_name: VarianceScaling
         config: {distribution: uniform, mode: fan_avg, scale: 1.0, seed: null}
       kernel_regularizer: null
-      name: dense_1
+      name: dense_2
       trainable: true
       units: 3
       use_bias: true
-  name: sequential_1
+  name: sequential_2
 keras_version: 2.2.4

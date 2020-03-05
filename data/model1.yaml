@@ -31,7 +31,7 @@ config:
       unit_forget_bias: true
       units: 128
   - class_name: Dropout
-    config: {name: dropout_1, noise_shape: null, rate: 0.3, seed: null, trainable: true}
+    config: {name: dropout_1, noise_shape: null, rate: 0.1, seed: null, trainable: true}
   - class_name: CuDNNLSTM
     config:
       activity_regularizer: null
@@ -59,7 +59,7 @@ config:
       unit_forget_bias: true
       units: 128
   - class_name: Dropout
-    config: {name: dropout_2, noise_shape: null, rate: 0.3, seed: null, trainable: true}
+    config: {name: dropout_2, noise_shape: null, rate: 0.1, seed: null, trainable: true}
   - class_name: Dense
     config:
       activation: softmax
