@@ -26,7 +26,7 @@ faulty_pose = None
 residual = np.empty(3)
 
 def loadScaler():
-    path = '/home/ace/catkin_ws/src/unity_controller/data/sim_data.csv'
+    path = '/home/conor/catkin_ws/src/unity_controller/data/sim_data.csv'
     df = pd.read_csv(path)
     df = df[['%velocity','%steering','%x','%y','%theta','%iteration','%time','%delay','%label']]
     df_array = df.to_numpy()
@@ -54,7 +54,7 @@ def processData(pid, line, scaler, acquire_data):
     rospy.init_node('fault_data', anonymous = True)
 
     labels = ["ideal", "no fault", "left fault", "right fault"]
-    rospy.Subscriber('/lilbot_EFD047/agent_poses', AgentPose, poseCallback, queue_size=1, tcp_nodelay=True)
+    rospy.Subscriber('agent_poses', AgentPose, poseCallback, queue_size=1, tcp_nodelay=True)
     velocity_publisher = rospy.Publisher('agent_velocities', AgentVelocity, queue_size=1, tcp_nodelay=True)
     rate = rospy.Rate(10) # 10hz
     msg = AgentVelocity()
@@ -69,9 +69,9 @@ def processData(pid, line, scaler, acquire_data):
     num_features = 8
     feature_vector = np.empty(num_features)
     training_data = []
-    hostname = "192.168.1.151"
+    hostname = "54.161.204.248"
 
-    producer = KafkaProducer(bootstrap_servers=['192.168.1.108:9092'],
+    producer = KafkaProducer(bootstrap_servers=[hostname+':9092'],
                              value_serializer=lambda x:
                              dumps(x).encode('utf-8'))
 
@@ -124,8 +124,8 @@ def processData(pid, line, scaler, acquire_data):
                 if np.isnan(np.sum(training_data)):
                     return
                 else:
-                    f = open('/home/ace/catkin_ws/src/unity_controller/data/sim_data.csv', 'a')
-                    np.savetxt(f, training_data, delimiter=",")
+                    # f = open('/home/ace/catkin_ws/src/unity_controller/data/sim_data.csv', 'a')
+                    # np.savetxt(f, training_data, delimiter=",")
                     return
             else:
                 return
@@ -135,8 +135,8 @@ def processData(pid, line, scaler, acquire_data):
 
 if __name__ == '__main__':
     # Create a MinMaxScaler
-    # scaler = loadScaler()
-    scaler = None
+    scaler = loadScaler()
+    # scaler = None
 
     # Process Data
     init_pose = np.array([0.0, 0.0, math.radians(0)])
@@ -144,7 +144,7 @@ if __name__ == '__main__':
     k = [0.5, 0.0, 0.0, 1, 0.0, 0.0]
     pid = PID(k)
     line = np.array([1.0, -2.0, 4.0])
-    processData(pid, line, scaler, 1)
+    processData(pid, line, scaler, 0)
 
     # data = np.concatenate((path1_error, path2_error, path3_error), axis=0)
     # # print(data)
