@@ -69,11 +69,11 @@ def processData(pid, line, scaler, acquire_data):
     num_features = 8
     feature_vector = np.empty(num_features)
     training_data = []
-    hostname = "54.161.204.248"
+    hostname = '54.161.204.248'
 
     producer = KafkaProducer(bootstrap_servers=[hostname+':9092'],
-                             value_serializer=lambda x:
-                             dumps(x).encode('utf-8'))
+                             value_serializer=lambda x:dumps(x).encode('utf-8'),
+                             api_version=(2, 12, 0))
 
     while not rospy.is_shutdown():
         if ideal_pose is not None:
@@ -97,20 +97,21 @@ def processData(pid, line, scaler, acquire_data):
             feature_vector = np.reshape(feature_vector, (1, num_features))
 
             if acquire_data:
-                sample = np.concatenate((feature_vector, np.reshape([3.0], (1, 1))), axis=1)
+                sample = np.concatenate((feature_vector, np.reshape([1.0], (1, 1))), axis=1)
                 training_data.append(sample)
                 print(feature_vector)
             else:
                 data = np.reshape(feature_vector, (1, num_features))
                 normalized_data = scaler.transform(data)
 
-                normalized_data = np.concatenate((normalized_data, np.reshape([3.0], (1, 1))), axis=1)
+                normalized_data = np.concatenate((normalized_data, np.reshape([1.0], (1, 1))), axis=1)
                 print(normalized_data.tolist)
 
                 value = {'signal' : normalized_data.tolist()}
                 print(value)
-                producer.send('data', value=value)
+                producer.send(topic='data', value=value)
                 sleep(0.05)
+                producer.flush()
 
             previous_time = rospy.get_time()
             iteration += 1
