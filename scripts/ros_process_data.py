@@ -24,6 +24,7 @@ from sklearn.preprocessing import MinMaxScaler
 ideal_pose = None
 faulty_pose = None
 residual = np.empty(3)
+fault
 
 def loadScaler():
     path = '/home/conor/catkin_ws/src/unity_controller/data/sim_data.csv'
@@ -40,16 +41,17 @@ def loadScaler():
     return scaler
 
 def poseCallback(msg):
-    global ideal_pose, faulty_pose, residual
+    global ideal_pose, faulty_pose, residual, fault
     # print(msg)
     ideal_pose = msg.agents[0]
     faulty_pose = msg.agents[1]
+    fault = faulty_pose.orientation.x
     residual[0] = faulty_pose.position.x - ideal_pose.position.x
     residual[1] = faulty_pose.position.y - ideal_pose.position.y
     residual[2] = faulty_pose.orientation.z - ideal_pose.orientation.z
 
 def processData(pid, line, scaler, acquire_data):
-    global ideal_pose, faulty_pose
+    global ideal_pose, faulty_pose, fault
     # initialize node
     rospy.init_node('fault_data', anonymous = True)
 
@@ -97,14 +99,14 @@ def processData(pid, line, scaler, acquire_data):
             feature_vector = np.reshape(feature_vector, (1, num_features))
 
             if acquire_data:
-                sample = np.concatenate((feature_vector, np.reshape([1.0], (1, 1))), axis=1)
+                sample = np.concatenate((feature_vector, np.reshape([float(fault)], (1, 1))), axis=1)
                 training_data.append(sample)
                 print(feature_vector)
             else:
                 data = np.reshape(feature_vector, (1, num_features))
                 normalized_data = scaler.transform(data)
 
-                normalized_data = np.concatenate((normalized_data, np.reshape([1.0], (1, 1))), axis=1)
+                normalized_data = np.concatenate((normalized_data, np.reshape([float(fault)], (1, 1))), axis=1)
                 print(normalized_data.tolist)
 
                 value = {'signal' : normalized_data.tolist()}

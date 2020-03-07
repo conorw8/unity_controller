@@ -57,11 +57,16 @@ class KerasConsumer():
                 # print(y_hat)
                 if np.argmax(y_hat) == 0:
                     print("Predicted: Healthy")
-                    true_positive += 1
+                    if label == 1.0:
+                        true_positive += 1
                 elif np.argmax(y_hat) == 1:
                     print("Predicted: Left Fault")
+                    if label == 2.0:
+                        true_positive += 1
                 else:
                     print("Predicted: Right Fault")
+                    if label == 3.0:
+                        true_positive += 1
 
                 if true_positive > 0:
                     accuracy = float(true_positive)/float(sample_count) * 100
