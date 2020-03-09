@@ -110,7 +110,7 @@ if __name__ == '__main__':
     healthy_ugv.setNoiseFunction()
     init_pose = np.array([0.0, 0.0, math.radians(0)])
     init_pose = np.reshape(init_pose, (3,1))
-    fault1_ugv = Bicycle(init_pose, 22.5, 10, faulty_k, fault=3)
+    fault1_ugv = Bicycle(init_pose, 22.5, 10, faulty_k, fault=1)
     fault1_ugv.setNoiseFunction()
 
     line = np.array([1.0, -2.0, 4.0])

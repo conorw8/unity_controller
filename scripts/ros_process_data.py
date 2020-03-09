@@ -24,7 +24,7 @@ from sklearn.preprocessing import MinMaxScaler
 ideal_pose = None
 faulty_pose = None
 residual = np.empty(3)
-fault
+fault = 0
 
 def loadScaler():
     path = '/home/conor/catkin_ws/src/unity_controller/data/sim_data.csv'
