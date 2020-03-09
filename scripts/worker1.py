@@ -4,7 +4,7 @@ from json import loads
 import sys
 import numpy as np
 
-ip = '54.161.204.248'
+ip = '54.152.215.103'
 group = 'T'
 model_path = '/home/ubuntu/unity_controller/data/model1.yaml'
 weights_path = '/home/ubuntu/unity_controller/data/model1.h5'
