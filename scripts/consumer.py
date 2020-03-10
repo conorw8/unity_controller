@@ -1,5 +1,5 @@
-from kafka import KafkaConsumer
-from json import loads
+from kafka import KafkaConsumer, KafkaProducer
+from json import loads, dumps
 import sys
 import numpy as np
 import tensorflow as tf
@@ -9,15 +9,19 @@ from keras.layers import Dense, CuDNNLSTM
 from keras.models import model_from_yaml
 
 class KerasConsumer():
-    def __init__(self, ip, group, model_path, weights_path):
+    def __init__(self, ip, group, model_path, weights_path, topic):
         self.consumer = KafkaConsumer('data', bootstrap_servers=[ip+':9092'],
                                       auto_offset_reset='latest', enable_auto_commit=False,
                                       group_id=group, value_deserializer=lambda x: loads(x.decode('utf-8')))
+        self.producer = KafkaProducer(bootstrap_servers=[ip+':9092'],
+                                      value_serializer=lambda x:dumps(x).encode('utf-8'),
+                                      api_version=(2, 12, 0))
         self.model_path = model_path
         self.weights_path = weights_path
         self.model = None
         self.num_features = 7
         self.timesteps = 10
+        self.result = topic
 
     def loadModel(self):
         yaml_file = open(self.model_path, 'r')
@@ -67,6 +71,12 @@ class KerasConsumer():
                     print("Predicted: Right Fault")
                     if label == 3.0:
                         true_positive += 1
+
+                value = {'result' : y_hat.tolist()}
+                print(value)
+                producer.send(topic=self.result, value=value)
+                sleep(0.05)
+                producer.flush()
 
                 if true_positive > 0:
                     accuracy = float(true_positive)/float(sample_count) * 100

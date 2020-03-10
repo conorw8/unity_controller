@@ -103,9 +103,10 @@ def predict(models):
     yhat4 = models[3].model.predict(x=x, batch_size=models[0].batch_size, verbose=1)
     y_true = models[0].encoder.inverse_transform(models[0].test_y)
 
-    num_class1 = y_true[(y_true==1).all(axis=1)].shape
-    num_class2 = y_true[(y_true==2).all(axis=1)].shape
-    num_class3 = y_true[(y_true==3).all(axis=1)].shape
+    num_class1 = y_true[(y_true==1).all(axis=1)].shape[0]
+    num_class2 = y_true[(y_true==2).all(axis=1)].shape[0]
+    num_class3 = y_true[(y_true==3).all(axis=1)].shape[0]
+    print(num_class1)
 
     y_pred1 = np.zeros((yhat1.shape[0], models[0].num_labels))
     for i in range(yhat1.shape[0]):
@@ -117,9 +118,9 @@ def predict(models):
             y_pred1[i, :] = [0, 0, 1]
     y_pred1 = models[0].encoder.inverse_transform(y_pred1)
     conf_matrix1 = confusion_matrix(y_true, y_pred1)
-    y1_class1_accuracy = conf_matrix1[0,0]/num_class1
-    y1_class2_accuracy = conf_matrix1[1,1]/num_class2
-    y1_class3_accuracy = conf_matrix1[2,2]/num_class3
+    y1_class1_accuracy = float(conf_matrix1[0,0])/float(num_class1)
+    y1_class2_accuracy = float(conf_matrix1[1,1])/float(num_class2)
+    y1_class3_accuracy = float(conf_matrix1[2,2])/float(num_class3)
     print(y1_class1_accuracy, y1_class2_accuracy, y1_class3_accuracy)
     df_cm1 = pd.DataFrame(conf_matrix1, index = ["healthy", "left fault", "right fault"],
                       columns = ["healthy", "left fault", "right fault"])
@@ -128,7 +129,7 @@ def predict(models):
     plt.title("Single LSTM Model Confusion Matrix")
     plt.xlabel('True Label')
     plt.ylabel('Predicted Label')
-    plt.show()
+    # plt.show()
 
     y_pred2 = np.zeros((yhat2.shape[0], models[0].num_labels))
     for i in range(yhat2.shape[0]):
@@ -140,6 +141,10 @@ def predict(models):
             y_pred2[i, :] = [0, 0, 1]
     y_pred2 = models[0].encoder.inverse_transform(y_pred2)
     conf_matrix2 = confusion_matrix(y_true, y_pred2)
+    y2_class1_accuracy = float(conf_matrix2[0,0])/float(num_class1)
+    y2_class2_accuracy = float(conf_matrix2[1,1])/float(num_class2)
+    y2_class3_accuracy = float(conf_matrix2[2,2])/float(num_class3)
+    print(y2_class1_accuracy, y2_class2_accuracy, y2_class3_accuracy)
     df_cm2 = pd.DataFrame(conf_matrix2, index = ["healthy", "left fault", "right fault"],
                       columns = ["healthy", "left fault", "right fault"])
     plt.figure(figsize = (7,7))
@@ -147,7 +152,7 @@ def predict(models):
     plt.title("Single LSTM Model Confusion Matrix")
     plt.xlabel('True Label')
     plt.ylabel('Predicted Label')
-    plt.show()
+    # plt.show()
 
     y_pred3 = np.zeros((yhat3.shape[0], models[0].num_labels))
     for i in range(yhat3.shape[0]):
@@ -159,6 +164,10 @@ def predict(models):
             y_pred3[i, :] = [0, 0, 1]
     y_pred3 = models[0].encoder.inverse_transform(y_pred3)
     conf_matrix3 = confusion_matrix(y_true, y_pred3)
+    y3_class1_accuracy = float(conf_matrix3[0,0])/float(num_class1)
+    y3_class2_accuracy = float(conf_matrix3[1,1])/float(num_class2)
+    y3_class3_accuracy = float(conf_matrix3[2,2])/float(num_class3)
+    print(y3_class1_accuracy, y3_class2_accuracy, y3_class3_accuracy)
     df_cm3 = pd.DataFrame(conf_matrix3, index = ["healthy", "left fault", "right fault"],
                       columns = ["healthy", "left fault", "right fault"])
     plt.figure(figsize = (7,7))
@@ -166,7 +175,7 @@ def predict(models):
     plt.title("Single LSTM Model Confusion Matrix")
     plt.xlabel('True Label')
     plt.ylabel('Predicted Label')
-    plt.show()
+    # plt.show()
 
     y_pred4 = np.zeros((yhat4.shape[0], models[0].num_labels))
     for i in range(yhat4.shape[0]):
@@ -178,6 +187,10 @@ def predict(models):
             y_pred4[i, :] = [0, 0, 1]
     y_pred4 = models[0].encoder.inverse_transform(y_pred4)
     conf_matrix4 = confusion_matrix(y_true, y_pred4)
+    y4_class1_accuracy = float(conf_matrix4[0,0])/float(num_class1)
+    y4_class2_accuracy = float(conf_matrix4[1,1])/float(num_class2)
+    y4_class3_accuracy = float(conf_matrix4[2,2])/float(num_class3)
+    print(y4_class1_accuracy, y4_class2_accuracy, y4_class3_accuracy)
     df_cm4 = pd.DataFrame(conf_matrix4, index = ["healthy", "left fault", "right fault"],
                       columns = ["healthy", "left fault", "right fault"])
     plt.figure(figsize = (7,7))
@@ -185,7 +198,7 @@ def predict(models):
     plt.title("Single LSTM Model Confusion Matrix")
     plt.xlabel('True Label')
     plt.ylabel('Predicted Label')
-    plt.show()
+    # plt.show()
 
     ensemble_yhat = (yhat1 + yhat2 + yhat3 + yhat4) / 4.0
     ensemble_pred = np.zeros((ensemble_yhat.shape[0], models[0].num_labels))
@@ -198,6 +211,10 @@ def predict(models):
             ensemble_yhat[i, :] = [0, 0, 1]
     ensemble_yhat = models[0].encoder.inverse_transform(ensemble_yhat)
     conf_matrix_ensemble = confusion_matrix(y_true, ensemble_yhat)
+    y_class1_accuracy = float(conf_matrix_ensemble[0,0])/float(num_class1)
+    y_class2_accuracy = float(conf_matrix_ensemble[1,1])/float(num_class2)
+    y_class3_accuracy = float(conf_matrix_ensemble[2,2])/float(num_class3)
+    print(y_class1_accuracy, y_class2_accuracy, y_class3_accuracy)
     df_cm_ensemble = pd.DataFrame(conf_matrix_ensemble, index = ["healthy", "left fault", "right fault"],
                       columns = ["healthy", "left fault", "right fault"])
     plt.figure(figsize = (7,7))
