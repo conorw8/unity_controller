@@ -21,7 +21,7 @@ class Predictor():
         self.model_path = model_path
         self.weights_path = weights_path
         self.model = None
-        self.num_features = 8
+        self.num_features = 7
         self.lookback = 10
         self.batch_size = 128
         self.num_labels = 3
@@ -62,7 +62,7 @@ class Predictor():
 
     def loadData(self, path):
         df = pd.read_csv(path)
-        dataset = df[['%velocity','%steering','%x','%y','%theta','%iteration','%time','%delay','%label']]
+        dataset = df[['%velocity','%steering','%x','%y','%theta','%iteration','%time','%label']]
         dataset = dataset.to_numpy()
         data = dataset[:, :-1]
         print(data.shape)
@@ -95,48 +95,148 @@ class Predictor():
         # evaluate loaded model on test data
         self.model.compile(optimizer='Adam', loss='categorical_crossentropy', metrics=['accuracy'])
 
-    def predict(self):
-        start_time1 = timeit.default_timer()
+def predict(models):
+    x = models[0].test_x
+    yhat1 = models[0].model.predict(x=x, batch_size=models[0].batch_size, verbose=1)
+    yhat2 = models[1].model.predict(x=x, batch_size=models[0].batch_size, verbose=1)
+    yhat3 = models[2].model.predict(x=x, batch_size=models[0].batch_size, verbose=1)
+    yhat4 = models[3].model.predict(x=x, batch_size=models[0].batch_size, verbose=1)
+    y_true = models[0].encoder.inverse_transform(models[0].test_y)
 
-        x = np.reshape(self.test_x[0, :, :], (1, self.lookback, self.num_features))
-        lstm_y_hat_test = self.model.predict(x=x, batch_size=self.batch_size, verbose=1)
-        elapsed1 = timeit.default_timer() - start_time1
+    num_class1 = y_true[(y_true==1).all(axis=1)].shape
+    num_class2 = y_true[(y_true==2).all(axis=1)].shape
+    num_class3 = y_true[(y_true==3).all(axis=1)].shape
 
-        print('Finished in %s second(s)' % round((elapsed1), 3))
+    y_pred1 = np.zeros((yhat1.shape[0], models[0].num_labels))
+    for i in range(yhat1.shape[0]):
+        if np.argmax(yhat1[i, :]) == 0:
+            y_pred1[i, :] = [1, 0, 0]
+        elif np.argmax(yhat1[i, :]) == 1:
+            y_pred1[i, :] = [0, 1, 0]
+        else:
+            y_pred1[i, :] = [0, 0, 1]
+    y_pred1 = models[0].encoder.inverse_transform(y_pred1)
+    conf_matrix1 = confusion_matrix(y_true, y_pred1)
+    y1_class1_accuracy = conf_matrix1[0,0]/num_class1
+    y1_class2_accuracy = conf_matrix1[1,1]/num_class2
+    y1_class3_accuracy = conf_matrix1[2,2]/num_class3
+    print(y1_class1_accuracy, y1_class2_accuracy, y1_class3_accuracy)
+    df_cm1 = pd.DataFrame(conf_matrix1, index = ["healthy", "left fault", "right fault"],
+                      columns = ["healthy", "left fault", "right fault"])
+    plt.figure(figsize = (7,7))
+    sn.heatmap(df_cm1, annot=True, cmap="YlGnBu", fmt='g')
+    plt.title("Single LSTM Model Confusion Matrix")
+    plt.xlabel('True Label')
+    plt.ylabel('Predicted Label')
+    plt.show()
 
-        lstm_y_hat_eval = self.model.evaluate(x=self.test_x, y=self.test_y, batch_size=self.batch_size, verbose=1)
-        print(lstm_y_hat_eval)
+    y_pred2 = np.zeros((yhat2.shape[0], models[0].num_labels))
+    for i in range(yhat2.shape[0]):
+        if np.argmax(yhat2[i, :]) == 0:
+            y_pred2[i, :] = [1, 0, 0]
+        elif np.argmax(yhat2[i, :]) == 1:
+            y_pred2[i, :] = [0, 1, 0]
+        else:
+            y_pred2[i, :] = [0, 0, 1]
+    y_pred2 = models[0].encoder.inverse_transform(y_pred2)
+    conf_matrix2 = confusion_matrix(y_true, y_pred2)
+    df_cm2 = pd.DataFrame(conf_matrix2, index = ["healthy", "left fault", "right fault"],
+                      columns = ["healthy", "left fault", "right fault"])
+    plt.figure(figsize = (7,7))
+    sn.heatmap(df_cm2, annot=True, cmap="YlGnBu", fmt='g')
+    plt.title("Single LSTM Model Confusion Matrix")
+    plt.xlabel('True Label')
+    plt.ylabel('Predicted Label')
+    plt.show()
 
-        lstm_y_hat = self.model.predict(x=self.test_x, batch_size=128, verbose=1)
+    y_pred3 = np.zeros((yhat3.shape[0], models[0].num_labels))
+    for i in range(yhat3.shape[0]):
+        if np.argmax(yhat3[i, :]) == 0:
+            y_pred3[i, :] = [1, 0, 0]
+        elif np.argmax(yhat3[i, :]) == 1:
+            y_pred3[i, :] = [0, 1, 0]
+        else:
+            y_pred3[i, :] = [0, 0, 1]
+    y_pred3 = models[0].encoder.inverse_transform(y_pred3)
+    conf_matrix3 = confusion_matrix(y_true, y_pred3)
+    df_cm3 = pd.DataFrame(conf_matrix3, index = ["healthy", "left fault", "right fault"],
+                      columns = ["healthy", "left fault", "right fault"])
+    plt.figure(figsize = (7,7))
+    sn.heatmap(df_cm3, annot=True, cmap="YlGnBu", fmt='g')
+    plt.title("Single LSTM Model Confusion Matrix")
+    plt.xlabel('True Label')
+    plt.ylabel('Predicted Label')
+    plt.show()
 
-        lstm_y_pred = np.zeros((lstm_y_hat.shape[0], self.num_labels))
-        for i in range(lstm_y_hat.shape[0]):
-            if np.argmax(lstm_y_hat[i, :]) == 0:
-                lstm_y_pred[i, :] = [1, 0, 0]
-            elif np.argmax(lstm_y_hat[i, :]) == 1:
-                lstm_y_pred[i, :] = [0, 1, 0]
-            else:
-                lstm_y_pred[i, :] = [0, 0, 1]
-        lstm_y_pred = self.encoder.inverse_transform(lstm_y_pred)
-        y_true = self.encoder.inverse_transform(self.test_y)
-        print(y_true.shape)
-        lstm_conf_matrix = confusion_matrix(y_true, lstm_y_pred)
-        print("LSTM Confusion Matrix")
-        print(lstm_conf_matrix)
-        df_cm = pd.DataFrame(lstm_conf_matrix, index = ["healthy", "left fault", "right fault"],
-                          columns = ["healthy", "left fault", "right fault"])
-        print(df_cm)
-        plt.figure(figsize = (10,7))
-        sn.heatmap(df_cm, annot=True, cmap="YlGnBu", fmt='g')
-        plt.title("Single LSTM Model Confusion Matrix")
-        plt.show()
+    y_pred4 = np.zeros((yhat4.shape[0], models[0].num_labels))
+    for i in range(yhat4.shape[0]):
+        if np.argmax(yhat4[i, :]) == 0:
+            y_pred4[i, :] = [1, 0, 0]
+        elif np.argmax(yhat4[i, :]) == 1:
+            y_pred4[i, :] = [0, 1, 0]
+        else:
+            y_pred4[i, :] = [0, 0, 1]
+    y_pred4 = models[0].encoder.inverse_transform(y_pred4)
+    conf_matrix4 = confusion_matrix(y_true, y_pred4)
+    df_cm4 = pd.DataFrame(conf_matrix4, index = ["healthy", "left fault", "right fault"],
+                      columns = ["healthy", "left fault", "right fault"])
+    plt.figure(figsize = (7,7))
+    sn.heatmap(df_cm4, annot=True, cmap="YlGnBu", fmt='g')
+    plt.title("Single LSTM Model Confusion Matrix")
+    plt.xlabel('True Label')
+    plt.ylabel('Predicted Label')
+    plt.show()
+
+    ensemble_yhat = (yhat1 + yhat2 + yhat3 + yhat4) / 4.0
+    ensemble_pred = np.zeros((ensemble_yhat.shape[0], models[0].num_labels))
+    for i in range(ensemble_yhat.shape[0]):
+        if np.argmax(ensemble_yhat[i, :]) == 0:
+            ensemble_yhat[i, :] = [1, 0, 0]
+        elif np.argmax(ensemble_yhat[i, :]) == 1:
+            ensemble_yhat[i, :] = [0, 1, 0]
+        else:
+            ensemble_yhat[i, :] = [0, 0, 1]
+    ensemble_yhat = models[0].encoder.inverse_transform(ensemble_yhat)
+    conf_matrix_ensemble = confusion_matrix(y_true, ensemble_yhat)
+    df_cm_ensemble = pd.DataFrame(conf_matrix_ensemble, index = ["healthy", "left fault", "right fault"],
+                      columns = ["healthy", "left fault", "right fault"])
+    plt.figure(figsize = (7,7))
+    sn.heatmap(df_cm_ensemble, annot=True, cmap="YlGnBu", fmt='g')
+    plt.title("Ensemble LSTM Model Confusion Matrix")
+    plt.xlabel('True Label')
+    plt.ylabel('Predicted Label')
+    plt.show()
 
 if __name__=='__main__':
-    path = '/home/conor/catkin_ws/src/unity_controller/data/sim_data.csv'
-    model_path = '/home/conor/catkin_ws/src/unity_controller/data/model1.yaml'
-    weights_path = '/home/conor/catkin_ws/src/unity_controller/data/model1.h5'
+    path = '/home/ace/catkin_ws/src/unity_controller/data/sim_data.csv'
+    model_path1 = '/home/ace/catkin_ws/src/unity_controller/data/model1.yaml'
+    weights_path1 = '/home/ace/catkin_ws/src/unity_controller/data/model1.h5'
 
-    predictor = Predictor(model_path, weights_path)
-    predictor.loadData(path)
-    predictor.loadModel()
-    predictor.predict()
+    model_path2 = '/home/ace/catkin_ws/src/unity_controller/data/model2.yaml'
+    weights_path2 = '/home/ace/catkin_ws/src/unity_controller/data/model2.h5'
+
+    model_path3 = '/home/ace/catkin_ws/src/unity_controller/data/model3.yaml'
+    weights_path3 = '/home/ace/catkin_ws/src/unity_controller/data/model3.h5'
+
+    model_path4 = '/home/ace/catkin_ws/src/unity_controller/data/model4.yaml'
+    weights_path4 = '/home/ace/catkin_ws/src/unity_controller/data/model4.h5'
+
+    predictor1 = Predictor(model_path1, weights_path1)
+    predictor1.loadData(path)
+    predictor1.loadModel()
+
+    predictor2 = Predictor(model_path2, weights_path2)
+    predictor2.loadData(path)
+    predictor2.loadModel()
+
+    predictor3 = Predictor(model_path3, weights_path3)
+    predictor3.loadData(path)
+    predictor3.loadModel()
+
+    predictor4 = Predictor(model_path4, weights_path4)
+    predictor4.loadData(path)
+    predictor4.loadModel()
+
+    models = [predictor1, predictor2, predictor3, predictor4]
+
+    predict(models)
