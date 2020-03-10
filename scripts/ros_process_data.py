@@ -29,7 +29,7 @@ fault = 0
 def loadScaler():
     path = '/home/ace/catkin_ws/src/unity_controller/data/sim_data.csv'
     df = pd.read_csv(path)
-    df = df[['%velocity','%steering','%x','%y','%theta','%iteration','%time','%delay','%label']]
+    df = df[['%velocity','%steering','%x','%y','%theta','%iteration','%time','%label']]
     df_array = df.to_numpy()
     dataset = df_array[:, :-1]
     labels = np.reshape(df_array[:, -1], (-1, 1))

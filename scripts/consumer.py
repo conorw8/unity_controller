@@ -74,9 +74,9 @@ class KerasConsumer():
 
                 value = {'result' : y_hat.tolist()}
                 print(value)
-                producer.send(topic=self.result, value=value)
+                self.producer.send(topic=self.result, value=value)
                 sleep(0.05)
-                producer.flush()
+                self.producer.flush()
 
                 if true_positive > 0:
                     accuracy = float(true_positive)/float(sample_count) * 100
