@@ -58,7 +58,7 @@ class FaultClassifier():
 
     def loadData(self, path):
         df = pd.read_csv(path)
-        dataset = df[['%velocity','%steering','%x','%y','%theta','%iteration','%time','%delay','%label']]
+        dataset = df[['%velocity','%steering','%x','%y','%theta','%iteration','%time','%label']]
         dataset = dataset.to_numpy()
         data = dataset[:, :-1]
         print(data.shape)
@@ -119,28 +119,28 @@ if __name__ == '__main__':
     path = '/home/ace/catkin_ws/src/unity_controller/data/sim_data.csv'
     model_path1 = '/home/ace/catkin_ws/src/unity_controller/data/model1.yaml'
     weights_path1 = '/home/ace/catkin_ws/src/unity_controller/data/model1.h5'
-    classifier1 = FaultClassifier(num_features=8, num_labels=3, lookback=10, num_epochs=500, batch_size=128)
+    classifier1 = FaultClassifier(num_features=7, num_labels=3, lookback=10, num_epochs=500, batch_size=128)
     classifier1.loadData(path)
     classifier1.trainModel(model_path1, weights_path1, 0.1)
     classifier1.predict()
 
     model_path2 = '/home/ace/catkin_ws/src/unity_controller/data/model2.yaml'
     weights_path2 = '/home/ace/catkin_ws/src/unity_controller/data/model2.h5'
-    classifier2 = FaultClassifier(num_features=8, num_labels=3, lookback=10, num_epochs=500, batch_size=64)
+    classifier2 = FaultClassifier(num_features=7, num_labels=3, lookback=10, num_epochs=500, batch_size=64)
     classifier2.loadData(path)
     classifier2.trainModel(model_path2, weights_path2, 0.2)
     classifier2.predict()
 
     model_path3 = '/home/ace/catkin_ws/src/unity_controller/data/model3.yaml'
     weights_path3 = '/home/ace/catkin_ws/src/unity_controller/data/model3.h5'
-    classifier3 = FaultClassifier(num_features=8, num_labels=3, lookback=10, num_epochs=500, batch_size=32)
+    classifier3 = FaultClassifier(num_features=7, num_labels=3, lookback=10, num_epochs=500, batch_size=32)
     classifier3.loadData(path)
     classifier3.trainModel(model_path3, weights_path3, 0.3)
     classifier3.predict()
 
     model_path4 = '/home/ace/catkin_ws/src/unity_controller/data/model4.yaml'
     weights_path4 = '/home/ace/catkin_ws/src/unity_controller/data/model4.h5'
-    classifier4 = FaultClassifier(num_features=8, num_labels=3, lookback=10, num_epochs=500, batch_size=16)
+    classifier4 = FaultClassifier(num_features=7, num_labels=3, lookback=10, num_epochs=500, batch_size=16)
     classifier4.loadData(path)
     classifier4.trainModel(model_path4, weights_path4, 0.4)
     classifier4.predict()

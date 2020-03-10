@@ -27,7 +27,7 @@ residual = np.empty(3)
 fault = 0
 
 def loadScaler():
-    path = '/home/conor/catkin_ws/src/unity_controller/data/sim_data.csv'
+    path = '/home/ace/catkin_ws/src/unity_controller/data/sim_data.csv'
     df = pd.read_csv(path)
     df = df[['%velocity','%steering','%x','%y','%theta','%iteration','%time','%delay','%label']]
     df_array = df.to_numpy()
@@ -68,10 +68,10 @@ def processData(pid, line, scaler, acquire_data):
     time = 0.0
     start_time = 0.0
     iteration = 0
-    num_features = 8
+    num_features = 7
     feature_vector = np.empty(num_features)
     training_data = []
-    hostname = '54.161.204.248'
+    hostname = '54.152.215.103'
 
     producer = KafkaProducer(bootstrap_servers=[hostname+':9092'],
                              value_serializer=lambda x:dumps(x).encode('utf-8'),
@@ -88,14 +88,14 @@ def processData(pid, line, scaler, acquire_data):
             faulty_distance, faulty_heading = pid.computeNormalDistance(faulty_pose.position.x, faulty_pose.position.y, faulty_pose.orientation.z, line)
             faulty_velocity.velocity, faulty_velocity.steering = pid.calculatePID(faulty_distance, faulty_heading, dt)
 
-            # Check network status
-            output = subprocess.Popen(["sudo", "ping",hostname, "-c", "1", "-i", "0.1"],stdout = subprocess.PIPE).communicate()[0]
-            delay = re.findall(r"[0-9]+\.[0-9]+/([0-9]+\.[0-9]+)/[0-9]+\.[0-9]+/[0-9]+\.[0-9]+", output.decode('utf-8'))
+            # # Check network status
+            # output = subprocess.Popen(["sudo", "ping",hostname, "-c", "1", "-i", "0.1"],stdout = subprocess.PIPE).communicate()[0]
+            # delay = re.findall(r"[0-9]+\.[0-9]+/([0-9]+\.[0-9]+)/[0-9]+\.[0-9]+/[0-9]+\.[0-9]+", output.decode('utf-8'))
+            #
+            # if delay == None:
+            #     delay = np.array([0])
 
-            if delay == None:
-                delay = np.array([0])
-
-            feature_vector = np.array([float(faulty_pose.position.z), float(faulty_velocity.velocity + faulty_velocity.steering), float(residual[0]), float(residual[1]), float(residual[2]), float(iteration), float(time), float(delay[0])])
+            feature_vector = np.array([float(faulty_pose.position.z), float(faulty_velocity.velocity + faulty_velocity.steering), float(residual[0]), float(residual[1]), float(residual[2]), float(iteration), float(time)])
             feature_vector = np.reshape(feature_vector, (1, num_features))
 
             if acquire_data:

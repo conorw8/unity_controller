@@ -16,7 +16,7 @@ class KerasConsumer():
         self.model_path = model_path
         self.weights_path = weights_path
         self.model = None
-        self.num_features = 8
+        self.num_features = 7
         self.timesteps = 10
 
     def loadModel(self):
