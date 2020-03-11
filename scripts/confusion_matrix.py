@@ -225,18 +225,18 @@ def predict(models):
     plt.show()
 
 if __name__=='__main__':
-    path = '/home/ace/catkin_ws/src/unity_controller/data/sim_data.csv'
-    model_path1 = '/home/ace/catkin_ws/src/unity_controller/data/model1.yaml'
-    weights_path1 = '/home/ace/catkin_ws/src/unity_controller/data/model1.h5'
+    path = '~/catkin_ws/src/unity_controller/data/sim_data.csv'
+    model_path1 = '~/catkin_ws/src/unity_controller/data/model1.yaml'
+    weights_path1 = '~/catkin_ws/src/unity_controller/data/model1.h5'
 
-    model_path2 = '/home/ace/catkin_ws/src/unity_controller/data/model2.yaml'
-    weights_path2 = '/home/ace/catkin_ws/src/unity_controller/data/model2.h5'
+    model_path2 = '~/catkin_ws/src/unity_controller/data/model2.yaml'
+    weights_path2 = '~/catkin_ws/src/unity_controller/data/model2.h5'
 
-    model_path3 = '/home/ace/catkin_ws/src/unity_controller/data/model3.yaml'
-    weights_path3 = '/home/ace/catkin_ws/src/unity_controller/data/model3.h5'
+    model_path3 = '~/catkin_ws/src/unity_controller/data/model3.yaml'
+    weights_path3 = '~/catkin_ws/src/unity_controller/data/model3.h5'
 
-    model_path4 = '/home/ace/catkin_ws/src/unity_controller/data/model4.yaml'
-    weights_path4 = '/home/ace/catkin_ws/src/unity_controller/data/model4.h5'
+    model_path4 = '~/catkin_ws/src/unity_controller/data/model4.yaml'
+    weights_path4 = '~/catkin_ws/src/unity_controller/data/model4.h5'
 
     predictor1 = Predictor(model_path1, weights_path1)
     predictor1.loadData(path)
