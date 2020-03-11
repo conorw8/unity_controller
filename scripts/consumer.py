@@ -44,8 +44,9 @@ class KerasConsumer():
         for message in self.consumer:
             key, val = message.value.items()[0]
             print(val)
-            val = np.reshape(val, (1,self.num_features+1))
-            features = val[0, :-1]
+            val = np.reshape(val, (1,self.num_features+2))
+            timestamp = val[0, 7]
+            features = val[0, 0:7]
             # print(features)
             features = np.reshape(features, (1,self.num_features))
             label = val[0, self.num_features]
@@ -73,6 +74,7 @@ class KerasConsumer():
                     if label == 3.0:
                         true_positive += 1
 
+                y_hat = np.concatenate((y_hat, np.reshape([float(timestamp)], (1, 1))), axis=1)
                 value = {'result' : y_hat.tolist()}
                 print(value)
                 self.producer.send(topic=self.result, value=value)

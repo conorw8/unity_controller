@@ -27,7 +27,7 @@ residual = np.empty(3)
 fault = 0
 
 def loadScaler():
-    path = '/home/ace/catkin_ws/src/unity_controller/data/sim_data.csv'
+    path = '/home/conor/catkin_ws/src/unity_controller/data/sim_data.csv'
     df = pd.read_csv(path)
     df = df[['%velocity','%steering','%x','%y','%theta','%iteration','%time','%label']]
     df_array = df.to_numpy()
@@ -71,7 +71,7 @@ def processData(pid, line, scaler, acquire_data):
     num_features = 7
     feature_vector = np.empty(num_features)
     training_data = []
-    hostname = '3.94.90.197'
+    hostname = '127.0.0.1'
 
     producer = KafkaProducer(bootstrap_servers=[hostname+':9092'],
                              value_serializer=lambda x:dumps(x).encode('utf-8'),
@@ -105,7 +105,7 @@ def processData(pid, line, scaler, acquire_data):
             else:
                 data = np.reshape(feature_vector, (1, num_features))
                 normalized_data = scaler.transform(data)
-
+                normalized_data = np.concatenate((normalized_data, np.reshape([float(rospy.get_time())], (1, 1))), axis=1)
                 normalized_data = np.concatenate((normalized_data, np.reshape([float(fault)], (1, 1))), axis=1)
                 print(normalized_data.tolist)
 
