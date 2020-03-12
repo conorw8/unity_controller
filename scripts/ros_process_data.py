@@ -71,7 +71,7 @@ def processData(pid, line, scaler, acquire_data):
     num_features = 7
     feature_vector = np.empty(num_features)
     training_data = []
-    hostname = '18.212.18.94'
+    hostname = '127.0.0.1'
 
     producer = KafkaProducer(bootstrap_servers=[hostname+':9092'],
                              value_serializer=lambda x:dumps(x).encode('utf-8'),

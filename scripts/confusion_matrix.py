@@ -106,7 +106,7 @@ def predict(models):
     num_class1 = y_true[(y_true==1).all(axis=1)].shape[0]
     num_class2 = y_true[(y_true==2).all(axis=1)].shape[0]
     num_class3 = y_true[(y_true==3).all(axis=1)].shape[0]
-    print(num_class1)
+    print(num_class1, num_class2, num_class3)
 
     y_pred1 = np.zeros((yhat1.shape[0], models[0].num_labels))
     for i in range(yhat1.shape[0]):
@@ -147,11 +147,11 @@ def predict(models):
     print(y2_class1_accuracy, y2_class2_accuracy, y2_class3_accuracy)
     df_cm2 = pd.DataFrame(conf_matrix2, index = ["healthy", "left fault", "right fault"],
                       columns = ["healthy", "left fault", "right fault"])
-    plt.figure(figsize = (7,7))
-    sn.heatmap(df_cm2, annot=True, cmap="YlGnBu", fmt='g')
-    plt.title("Single LSTM Model Confusion Matrix")
-    plt.xlabel('True Label')
-    plt.ylabel('Predicted Label')
+    # plt.figure(figsize = (7,7))
+    # sn.heatmap(df_cm2, annot=True, cmap="YlGnBu", fmt='g')
+    # plt.title("Single LSTM Model Confusion Matrix")
+    # plt.xlabel('True Label')
+    # plt.ylabel('Predicted Label')
     # plt.show()
 
     y_pred3 = np.zeros((yhat3.shape[0], models[0].num_labels))
@@ -170,11 +170,11 @@ def predict(models):
     print(y3_class1_accuracy, y3_class2_accuracy, y3_class3_accuracy)
     df_cm3 = pd.DataFrame(conf_matrix3, index = ["healthy", "left fault", "right fault"],
                       columns = ["healthy", "left fault", "right fault"])
-    plt.figure(figsize = (7,7))
-    sn.heatmap(df_cm3, annot=True, cmap="YlGnBu", fmt='g')
-    plt.title("Single LSTM Model Confusion Matrix")
-    plt.xlabel('True Label')
-    plt.ylabel('Predicted Label')
+    # plt.figure(figsize = (7,7))
+    # sn.heatmap(df_cm3, annot=True, cmap="YlGnBu", fmt='g')
+    # plt.title("Single LSTM Model Confusion Matrix")
+    # plt.xlabel('True Label')
+    # plt.ylabel('Predicted Label')
     # plt.show()
 
     y_pred4 = np.zeros((yhat4.shape[0], models[0].num_labels))
@@ -193,11 +193,11 @@ def predict(models):
     print(y4_class1_accuracy, y4_class2_accuracy, y4_class3_accuracy)
     df_cm4 = pd.DataFrame(conf_matrix4, index = ["healthy", "left fault", "right fault"],
                       columns = ["healthy", "left fault", "right fault"])
-    plt.figure(figsize = (7,7))
-    sn.heatmap(df_cm4, annot=True, cmap="YlGnBu", fmt='g')
-    plt.title("Single LSTM Model Confusion Matrix")
-    plt.xlabel('True Label')
-    plt.ylabel('Predicted Label')
+    # plt.figure(figsize = (7,7))
+    # sn.heatmap(df_cm4, annot=True, cmap="YlGnBu", fmt='g')
+    # plt.title("Single LSTM Model Confusion Matrix")
+    # plt.xlabel('True Label')
+    # plt.ylabel('Predicted Label')
     # plt.show()
 
     ensemble_yhat = (yhat1 + yhat2 + yhat3 + yhat4) / 4.0
@@ -225,18 +225,18 @@ def predict(models):
     plt.show()
 
 if __name__=='__main__':
-    path = '~/catkin_ws/src/unity_controller/data/sim_data.csv'
-    model_path1 = '~/catkin_ws/src/unity_controller/data/model1.yaml'
-    weights_path1 = '~/catkin_ws/src/unity_controller/data/model1.h5'
+    path = '/home/ace/catkin_ws/src/unity_controller/data/sim_data.csv'
+    model_path1 = '/home/ace/catkin_ws/src/unity_controller/data/model1.yaml'
+    weights_path1 = '/home/ace/catkin_ws/src/unity_controller/data/model1.h5'
 
-    model_path2 = '~/catkin_ws/src/unity_controller/data/model2.yaml'
-    weights_path2 = '~/catkin_ws/src/unity_controller/data/model2.h5'
+    model_path2 = '/home/ace/catkin_ws/src/unity_controller/data/model2.yaml'
+    weights_path2 = '/home/ace/catkin_ws/src/unity_controller/data/model2.h5'
 
-    model_path3 = '~/catkin_ws/src/unity_controller/data/model3.yaml'
-    weights_path3 = '~/catkin_ws/src/unity_controller/data/model3.h5'
+    model_path3 = '/home/ace/catkin_ws/src/unity_controller/data/model3.yaml'
+    weights_path3 = '/home/ace/catkin_ws/src/unity_controller/data/model3.h5'
 
-    model_path4 = '~/catkin_ws/src/unity_controller/data/model4.yaml'
-    weights_path4 = '~/catkin_ws/src/unity_controller/data/model4.h5'
+    model_path4 = '/home/ace/catkin_ws/src/unity_controller/data/model4.yaml'
+    weights_path4 = '/home/ace/catkin_ws/src/unity_controller/data/model4.h5'
 
     predictor1 = Predictor(model_path1, weights_path1)
     predictor1.loadData(path)

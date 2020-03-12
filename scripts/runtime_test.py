@@ -25,14 +25,32 @@ sample_count = 0
 true_positive = 0
 max_iter = 225 - 21
 converged = 0.0
+runtimes = []
 results = np.empty((4, 4))
 
 for message in consumer1:
     topic, iter, val = message.topic, message.offset, message.value['result']
     val = np.reshape(val, (1, num_labels+1))
-    runtime = (float(rospy.get_time()) - val[0, -1])*1000
+    feature = val[0, :-1]
+    feature = np.reshape(feature, (1,num_labels))
+    timestamp = val[0,-1]
+
+    runtime = (float(rospy.get_time()) - timestamp)*1000
     print("Runtime of Ensemble: %s ms" % runtime)
+    runtimes.append([runtime, 1])
+
+    prediction = feature[0, 2]*100
+    print("Predicted Probability: %s" % prediction)
+    if prediction >= 99.0 and converged == 0.0:
+        converged = sample_count
+
+    print(converged)
+    print(sample_count)
+
     sample_count += 1
 
     if sample_count == 200:
+        runtimes = np.array(runtimes)
+        # f = open('/home/ace/catkin_ws/src/unity_controller/data/runtime.csv', 'a')
+        # np.savetxt(f, runtimes, delimiter=",")
         sys.exit(1)
