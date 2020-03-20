@@ -11,13 +11,13 @@ from sklearn.discriminant_analysis import LinearDiscriminantAnalysis, QuadraticD
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler, MinMaxScaler, OneHotEncoder
 from sklearn.metrics import mean_squared_error, confusion_matrix
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, precision_score, recall_score
 
 # X{array-like, sparse matrix}, shape (n_samples, n_features)
 
 def loadData(path):
     df = pd.read_csv(path)
-    dataset = df[['%x', '%y', '%theta', '%iter', '%label']]
+    dataset = df[['%x','%y','%theta','%velocity','%steering','%iteration','%label']]
     dataset = dataset.to_numpy()
     data = dataset[:, :-1]
     print(data.shape)
@@ -32,9 +32,9 @@ def loadData(path):
 def trainModel(X, y):
     # model = QuadraticDiscriminantAnalysis()
     # model = LinearDiscriminantAnalysis()
-    model = KNeighborsClassifier()
+    # model = KNeighborsClassifier()
     # model = LogisticRegression()
-    # model = svm.SVC()
+    model = svm.SVC()
     model.fit(X, y)
 
     return model
@@ -43,12 +43,16 @@ def predict(model, X, y_true):
     y_hat = model.predict(X)
     conf_matrix = confusion_matrix(y_true, y_hat)
     accuracy = accuracy_score(y_true, y_hat)
-    print("Confusion Matrix")
-    print(conf_matrix)
+    precision = precision_score(y_true, y_hat, average='macro')
+    recall = recall_score(y_true, y_hat, average='macro')
+    # print("Confusion Matrix")
+    # print(conf_matrix)
     print("accuracy: %s" % accuracy)
+    print("precision: %s" % precision)
+    print("recall: %s" % recall)
 
 if __name__ == '__main__':
-    path = '/home/conor/catkin_ws/src/unity_controller/data/sim_data.csv'
+    path = '/home/ace/catkin_ws/src/network_faults/data/path_data.csv'
     X_train, X_test, y_train, y_test = loadData(path)
     model = trainModel(X_train, y_train)
     predict(model, X_test, y_test)

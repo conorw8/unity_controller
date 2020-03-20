@@ -12,44 +12,70 @@ def processData(path):
     data = pd.read_csv(path)
     dataset = data.to_numpy()
 
-    run = []
+    healthy = dataset[dataset[:,-1]==0]
+    left = dataset[dataset[:,-1]==1]
+    right = dataset[dataset[:,-1]==2]
+
+    healthy = np.reshape(healthy, (-1, 270, 4))
+    left = np.reshape(left, (-1, 270, 4))
+    right = np.reshape(right, (-1, 270, 4))
+
+    eta = 0.025
     noise_functions = []
-    last_iteration = 0.0
-    label = 0
-    count = 0
-    data = []
 
-    for i in range(dataset.shape[0]):
-        if dataset[i, 1] < last_iteration or i == dataset.shape[0] - 1:
-            run = np.array(run)
-            run = np.reshape(run, (-1, 7))
+    for i in range(healthy.shape[0]):
+        run = np.reshape(healthy[i, :, :], (-1, 4))
+        noise_function = cleanData(run, eta)
+        noise_functions.append(np.concatenate((noise_function, 0), axis=None))
 
-            # TODO: clean run and calculate statistics
-            eta = 0.05
-            noise_function = cleanData(run, eta)
-            noise_functions.append(np.concatenate((noise_function, label), axis=None))
-            print(noise_function)
+    for j in range(left.shape[0]):
+        run = np.reshape(left[j, :, :], (-1, 4))
+        noise_function = cleanData(run, eta)
+        noise_functions.append(np.concatenate((noise_function, 1), axis=None))
 
-            if label == 0:
-                data.append(run)
-            elif label == 1:
-                data.append(run)
-            else:
-                data.append(run)
+    for k in range(right.shape[0]):
+        run = np.reshape(right[k, :, :], (-1, 4))
+        noise_function = cleanData(run, eta)
+        noise_functions.append(np.concatenate((noise_function, 2), axis=None))
 
-            count += 1
-            if count % 4 == 0:
-                label += 1
-
-            last_iteration = dataset[i, 1]
-            run = []
-            run.append(dataset[i, :])
-        else:
-            run.append(dataset[i, :])
-            last_iteration = dataset[i, 1]
+    # run = []
+    # noise_functions = []
+    # last_iteration = 0.0
+    # label = 0
+    # count = 0
+    # data = []
+    #
+    # for i in range(dataset.shape[0]):
+    #     if dataset[i, 1] < last_iteration or i == dataset.shape[0] - 1:
+    #         run = np.array(run)
+    #         run = np.reshape(run, (-1, 7))
+    #
+    #         # TODO: clean run and calculate statistics
+    #         eta = 0.05
+    #         noise_function = cleanData(run, eta)
+    #         noise_functions.append(np.concatenate((noise_function, label), axis=None))
+    #         print(noise_function)
+    #
+    #         if label == 0:
+    #             data.append(run)
+    #         elif label == 1:
+    #             data.append(run)
+    #         else:
+    #             data.append(run)
+    #
+    #         count += 1
+    #         if count % 4 == 0:
+    #             label += 1
+    #
+    #         last_iteration = dataset[i, 1]
+    #         run = []
+    #         run.append(dataset[i, :])
+    #     else:
+    #         run.append(dataset[i, :])
+    #         last_iteration = dataset[i, 1]
 
     noise_functions = np.array(noise_functions)
-    print(noise_functions.shape)
+    print(noise_functions)
     healthy_distribution, left_distribution, right_distribution = computeDistribution(noise_functions)
     distribution_data = np.array([healthy_distribution, left_distribution, right_distribution])
     print(distribution_data.shape)
@@ -64,8 +90,11 @@ def processData(path):
     #     plt.scatter(run[:, 2], y_hat, color='blue', marker='p')
     #     plt.show()
 
-    f = open('/home/conor/catkin_ws/src/unity_controller/data/noise_functions.csv', 'w')
-    np.savetxt(f, noise_functions, delimiter=",")
+    # f = open('/home/ace/catkin_ws/src/network_faults/data/noise_functions.csv', 'w')
+    # np.savetxt(f, noise_functions, delimiter=",")
+    #
+    # f = open('/home/ace/catkin_ws/src/network_faults/data/distributions.csv', 'w')
+    # np.savetxt(f, distribution_data, delimiter=",")
 
 def func(x, a, b, c):
     return a*np.exp(b*x)+c
@@ -73,13 +102,13 @@ def func(x, a, b, c):
 def norm(x, x_hat):
     norm_vector = np.empty((x.shape[0], 1))
     for i in range(norm_vector.shape[0]):
-        norm_vector[i] = np.linalg.norm(x[i, 3] - x_hat[i])
+        norm_vector[i] = np.linalg.norm(x[i, 1] - x_hat[i])
 
     return norm_vector
 
 def zscoreOutliers(data, norm, iter):
     z = np.abs(stats.zscore(norm))
-    data_out = data[(z < (3-iter*0.2)).all(axis=1)]
+    data_out = data[(z < (3-iter*0.005)).all(axis=1)]
 
     return data_out
 
@@ -97,29 +126,30 @@ def cleanData(data, eta):
     run_norm = 100.0
     x = data
     iteration = 0
-    max_iter = 50
-    range = 5.0
+    max_iter = 10
+    range = 3.0
     initial_guess = np.array([0.1, 0.01, 0.01])
     upper_bounds = range*initial_guess
     lower_bounds = -range*initial_guess
-    range = 1.0
     count = 0.0
 
     while run_norm >= eta and iteration != max_iter and x.shape[0] > 50:
+        # range = range + range*(iteration*0.5)
         upper_bounds = initial_guess + range*np.fabs(initial_guess)
         lower_bounds = initial_guess - range*np.fabs(initial_guess)
+        print("range: %s" % range)
         print("initial guess")
         print(initial_guess)
         print("upper bounds")
         print(upper_bounds)
         print("lower bounds")
         print(lower_bounds)
-        print("count: %s" % count)
-        print("run norm: %s" % run_norm)
+        # print("count: %s" % count)
+        # print("run norm: %s" % run_norm)
 
         try:
-            popt, pcov = curve_fit(func, x[:, 2], x[:, 3], bounds=(lower_bounds, upper_bounds))
-            y_hat = func(x[:, 2], *popt)
+            popt, pcov = curve_fit(func, x[:, 0], x[:, 1], bounds=(lower_bounds, upper_bounds))
+            y_hat = func(x[:, 0], *popt)
             # plt.scatter(x[:, 2], x[:, 3], color='red', marker='p')
             # plt.scatter(x[:, 2], y_hat, color='blue', marker='p')
 
@@ -128,19 +158,19 @@ def cleanData(data, eta):
             data_zscore = zscoreOutliers(x, norm_vector, iteration)
             data_iqr = iqrOutliers(x, norm_vector, 25)
 
-            zscore_popt, zscore_pcov = curve_fit(func, data_zscore[:, 2], data_zscore[:, 3], bounds=(lower_bounds, upper_bounds))
-            zscore_y_hat = func(data_zscore[:, 2], *zscore_popt)
+            zscore_popt, zscore_pcov = curve_fit(func, data_zscore[:, 0], data_zscore[:, 1], bounds=(lower_bounds, upper_bounds))
+            zscore_y_hat = func(data_zscore[:, 0], *zscore_popt)
 
-            iqr_popt, iqr_pcov = curve_fit(func, data_iqr[:, 2], data_iqr[:, 3], bounds=(lower_bounds, upper_bounds))
-            iqr_y_hat = func(data_iqr[:, 2], *iqr_popt)
+            iqr_popt, iqr_pcov = curve_fit(func, data_iqr[:, 0], data_iqr[:, 1], bounds=(lower_bounds, upper_bounds))
+            iqr_y_hat = func(data_iqr[:, 0], *iqr_popt)
 
             zscore_norm_vector = norm(data_zscore, zscore_y_hat)
             iqr_norm_vector = norm(data_iqr, iqr_y_hat)
 
-            zscore_norm = np.linalg.norm(data_zscore[:, 3] - zscore_y_hat)
-            iqr_norm = np.linalg.norm(data_iqr[:, 3] - iqr_y_hat)
-            print("Zscore norm: %s" % zscore_norm)
-            print("IQR norm: %s" % iqr_norm)
+            zscore_norm = np.linalg.norm(data_zscore[:, 1] - zscore_y_hat)
+            iqr_norm = np.linalg.norm(data_iqr[:, 1] - iqr_y_hat)
+            # print("Zscore norm: %s" % zscore_norm)
+            # print("IQR norm: %s" % iqr_norm)
 
             print(x.shape)
             print(data_zscore.shape)
@@ -149,10 +179,10 @@ def cleanData(data, eta):
             print(iqr_y_hat.shape)
 
             if zscore_norm < iqr_norm:
-                # plt.scatter(data_zscore[:, 2], data_zscore[:, 3], color='red', label="sample data: iteration %s" % iteration)
-                # plt.scatter(data_zscore[:, 2], zscore_y_hat, color='blue', label="fitted data: iteration %s" % iteration)
-                # plt.title("Zscore Filtered Data")
-                # plt.legend()
+                plt.scatter(data_zscore[:, 0], data_zscore[:, 1], color='red', label="sample data: iteration %s" % iteration)
+                plt.scatter(data_zscore[:, 0], zscore_y_hat, color='blue', label="fitted data: iteration %s" % iteration)
+                plt.title("Zscore Filtered Data")
+                plt.legend()
 
                 run_opt = zscore_popt
                 initial_guess = run_opt
@@ -160,10 +190,10 @@ def cleanData(data, eta):
                 x = data_zscore
                 iteration += 1
             else:
-                # plt.scatter(data_iqr[:, 2], data_iqr[:, 3], color='red', label="sample data: iteration %s" % iteration)
-                # plt.scatter(data_iqr[:, 2], iqr_y_hat, color='blue', label="fitted data: iteration %s" % iteration)
-                # plt.title("IQR Filtered Data")
-                # plt.legend()
+                plt.scatter(data_iqr[:, 0], data_iqr[:, 1], color='red', label="sample data: iteration %s" % iteration)
+                plt.scatter(data_iqr[:, 0], iqr_y_hat, color='blue', label="fitted data: iteration %s" % iteration)
+                plt.title("IQR Filtered Data")
+                plt.legend()
 
                 run_opt = iqr_popt
                 initial_guess = run_opt
@@ -171,10 +201,9 @@ def cleanData(data, eta):
                 x = data_iqr
                 iteration += 1
 
-            range = 1.0
             count += 1
 
-            # plt.show()
+            plt.show()
         except RuntimeError:
             print("Error - curve_fit failed")
 
@@ -203,5 +232,5 @@ def computeDistribution(x):
     return healthy_distribution, left_distribution, right_distribution
 
 if __name__ == '__main__':
-    path = "~/catkin_ws/src/network_faults/data/lilbot_data.csv"
+    path = "~/catkin_ws/src/network_faults/data/noise_data.csv"
     processData(path)
